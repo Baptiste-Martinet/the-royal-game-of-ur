@@ -2,6 +2,7 @@ class Player {
   constructor () {
     this.name = 'baptiste';
     this.color = 0; //0=white, 1=black
+    this.nbPieces = 7;
   }
 }
 
@@ -27,7 +28,10 @@ const CELL_SIZE = 80;
 const WHITE = 0;
 const BLACK = 1;
 
-var player = new Player();
+const ME = 0;
+const HIM = 1;
+
+var players = [new Player, new Player];
 var board = new Array(14);
 
 /* utils functions */
@@ -51,9 +55,9 @@ function displayBoard()
 function displayHoveredCells()
 {
   for (let i = 0; i < 14; ++i) {
-    if (board[i][player.color].isHovered) {
+    if (board[i][players[ME].color].isHovered) {
       fill(255, 0, 0);
-      square(board[i][player.color].pos.x, board[i][player.color].pos.y, CELL_SIZE);
+      square(board[i][players[ME].color].pos.x, board[i][players[ME].color].pos.y, CELL_SIZE);
     }
   }
 }
@@ -112,12 +116,12 @@ function draw() {
 
 function mouseMoved() {
   for (let i = 0; i < 14; ++i) {
-    if (board[i][player.color].pos.x < mouseX && mouseX < board[i][player.color].pos.x + CELL_SIZE
-        && board[i][player.color].pos.y < mouseY && mouseY < board[i][player.color].pos.y + CELL_SIZE) {
-      if (board[i][player.color].isHovered == false)
-        board[i][player.color].isHovered = true;
-    } else if (board[i][player.color].isHovered == true) {
-      board[i][player.color].isHovered = false;
+    if (board[i][players[ME].color].pos.x < mouseX && mouseX < board[i][players[ME].color].pos.x + CELL_SIZE
+        && board[i][players[ME].color].pos.y < mouseY && mouseY < board[i][players[ME].color].pos.y + CELL_SIZE) {
+      if (board[i][players[ME].color].isHovered == false)
+        board[i][players[ME].color].isHovered = true;
+    } else if (board[i][players[ME].color].isHovered == true) {
+      board[i][players[ME].color].isHovered = false;
     }
   }
   return false;
