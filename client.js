@@ -3,6 +3,7 @@ class Player {
     this.name = 'baptiste';
     this.color = _color; //0=white, 1=black
     this.nbPieces = 7;
+    this.diceValue = -1;
   }
 }
 
@@ -36,6 +37,9 @@ var board = new Array(14);
 
 /* game variables */
 var topLeft = null;
+
+/* UI varaibles */
+var button = null;
 
 /* utils functions */
 
@@ -90,6 +94,8 @@ function setCellsPos()
   topLeft = new Vec2d(width / 2 - (CELL_SIZE * 4), height / 2 - (CELL_SIZE * 1.5));
   let currentPos = new Vec2d(3, 0);
 
+  button.position(topLeft.x, topLeft.y + (CELL_SIZE * 3.2));
+
   for (let i = 0; i < 14; ++i) {
     board[i][BLACK].pos.x = topLeft.x + CELL_SIZE * currentPos.x;
     board[i][BLACK].pos.y = topLeft.y + CELL_SIZE * currentPos.y;
@@ -111,6 +117,10 @@ function setCellsPos()
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+
+  button = createButton('Roll dices');
+  button.position(0, 0);
+  //button.mousePressed(changeBG);
 
   for (let i = 0; i < 14; ++i) {
     board[i] = [new Cell(new Vec2d(0, 0)), new Cell(new Vec2d(0, 0))]; //white cell & black cell
