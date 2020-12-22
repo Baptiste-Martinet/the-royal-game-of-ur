@@ -1,7 +1,7 @@
 class Player {
-  constructor () {
+  constructor (_color) {
     this.name = 'baptiste';
-    this.color = 0; //0=white, 1=black
+    this.color = _color; //0=white, 1=black
     this.nbPieces = 7;
   }
 }
@@ -31,8 +31,11 @@ const BLACK = 1;
 const ME = 0;
 const HIM = 1;
 
-var players = [new Player, new Player];
+var players = [new Player(0), new Player(1)];
 var board = new Array(14);
+
+/* game variables */
+var topLeft = null;
 
 /* utils functions */
 
@@ -62,9 +65,29 @@ function displayHoveredCells()
   }
 }
 
+function drawNbPieces(player)
+{
+  let pos = new Vec2d(topLeft.x + (CELL_SIZE * 4.5), topLeft.y + (CELL_SIZE * (player.color == WHITE ? 2.5 : 0.5)));
+
+  noStroke();
+  fill(0, 0, 255);
+  ellipse(pos.x, pos.y, CELL_SIZE * 0.8);
+  fill(255);
+  noStroke();
+  textSize(32);
+  textAlign(CENTER, CENTER);
+  text('7', pos.x, pos.y);
+}
+
+function displayNbPieces()
+{
+  drawNbPieces(players[ME]);
+  drawNbPieces(players[HIM]);
+}
+
 function setCellsPos()
 {
-  let topLeft = new Vec2d(width / 2 - (CELL_SIZE * 4), height / 2 - (CELL_SIZE * 1.5));
+  topLeft = new Vec2d(width / 2 - (CELL_SIZE * 4), height / 2 - (CELL_SIZE * 1.5));
   let currentPos = new Vec2d(3, 0);
 
   for (let i = 0; i < 14; ++i) {
@@ -107,6 +130,7 @@ function draw() {
   background(240);
   displayBoard();
   displayHoveredCells();
+  displayNbPieces();
 
   /* DEBUG */
   fill(255, 0, 0);
