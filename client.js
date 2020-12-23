@@ -3,7 +3,6 @@ class Player {
     this.name = 'baptiste';
     this.color = _color; //0=white, 1=black
     this.nbPieces = 7;
-    this.diceValue = -1;
   }
 }
 
@@ -32,11 +31,18 @@ const BLACK = 1;
 const ME = 0;
 const HIM = 1;
 
+const WAITING = 'waiting';
+const DRAWING_DICE = 'drawing dice';
+const MOVING = 'moving';
+
+var whosturn = -1;
 var players = [new Player(0), new Player(1)];
 var board = new Array(14);
 
 /* game variables */
 var topLeft = null;
+var diceValue = -1;
+var playerState = WAITING;
 
 /* UI varaibles */
 var button = null;
@@ -89,6 +95,23 @@ function displayNbPieces()
   drawNbPieces(players[HIM]);
 }
 
+function drawTriangle(bottomLeftCoords, size)
+{
+  fill(245, 153, 49);
+  triangle(bottomLeftCoords.x, bottomLeftCoords.y, bottomLeftCoords.x + (size / 2), bottomLeftCoords.y - (size * 0.9), bottomLeftCoords.x + size, bottomLeftCoords.y);
+}
+
+function displayDicesTriangles()
+{
+  let bottomLeft = new Vec2d(topLeft.x + (CELL_SIZE * 1.6), topLeft.y + (CELL_SIZE * 3.7));
+  let triangleSize = CELL_SIZE * 0.6;
+
+  for (let i = 0; i < 4; ++i) {
+    drawTriangle(bottomLeft, triangleSize);
+    bottomLeft.x += triangleSize + 6;
+  }
+}
+
 function setCellsPos()
 {
   topLeft = new Vec2d(width / 2 - (CELL_SIZE * 4), height / 2 - (CELL_SIZE * 1.5));
@@ -113,6 +136,23 @@ function setCellsPos()
   }
 }
 
+function setPlayerState(state)
+{
+  playerState = state;
+
+  if (playerState == DRAWING_DICE) {
+    button.show();
+  } else if (state == MOVING) {
+  } else {
+    button.hide();
+  }
+}
+
+function buttonPressed()
+{
+  button.elt.textContent = 'Skip turn';
+}
+
 /* p5 functions */
 
 function setup() {
@@ -120,12 +160,17 @@ function setup() {
 
   button = createButton('Roll dices');
   button.position(0, 0);
-  //button.mousePressed(changeBG);
+  button.size(CELL_SIZE * 1.5, CELL_SIZE * 0.5);
+  button.mousePressed(buttonPressed);
+  button.hide();
 
   for (let i = 0; i < 14; ++i) {
     board[i] = [new Cell(new Vec2d(0, 0)), new Cell(new Vec2d(0, 0))]; //white cell & black cell
   }
   setCellsPos(); //setting up the tiles positions for black and white
+
+  /* socket */
+  setPlayerState(DRAWING_DICE);
 }
 
 function windowResized() {
@@ -141,11 +186,12 @@ function draw() {
   displayBoard();
   displayHoveredCells();
   displayNbPieces();
+  displayDicesTriangles();
 
   /* DEBUG */
-  fill(255, 0, 0);
+  /*fill(255, 0, 0);
   noStroke();
-  ellipse(width / 2, height / 2, 30);
+  ellipse(width / 2, height / 2, 30);*/
 }
 
 function mouseMoved() {
