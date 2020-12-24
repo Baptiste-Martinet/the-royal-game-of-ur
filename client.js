@@ -50,6 +50,9 @@ const WAITING = 'waiting';
 const DRAWING_DICE = 'drawing dice';
 const MOVING = 'moving';
 
+const ERROR_MSG = 'ERROR :';
+const INFO_MSG = 'INFO: ';
+
 var whosturn = -1;
 var players = [new Player(0), new Player(1)];
 var board = new Array(14);
@@ -57,7 +60,7 @@ var theme = null;
 
 /* game variables */
 var topLeft = null;
-var diceValues = [0, 1, 0, 0];
+var diceValues = [0, 0, 0, 0];
 var totalDicesValue = -1;
 var playerState = WAITING;
 
@@ -207,25 +210,45 @@ function setPlayerState(state)
 
 function buttonPressed()
 {
-  button.elt.textContent = 'Skip turn';
+  //button.elt.textContent = 'Skip turn';
+
+  if (playerState != DRAWING_DICE) {
+    console.log(ERROR_MSG, 'State doesnt match:', playerState)
+    return;
+  }
+
+  playerState = MOVING;
+
+  totalDicesValue = 0;
+  for (let i = 0; i < 4; ++i) {
+    diceValues[i] = Math.floor(Math.random() * 2);
+    totalDicesValue += diceValues[i];
+  }
+  console.log(INFO_MSG, 'totalDicesValue: ', totalDicesValue);
 }
 
 function newPieceButtonClicked(color)
 {
-  console.log('create new piece for color', color)
+  if (color != players[0].color) {
+    console.log(ERROR_MSG, 'You can not interact with this button');
+    return;
+  }
+  if (playerState != MOVING) {
+    console.log(ERROR_MSG, 'State not matching:', playerState);
+    return;
+  }
+  board[totalDicesValue - 1][color].isOccupied = true;
+  playerState = WAITING;
 }
 
 /* p5 functions */
 
 function preload()
 {
-  otherPointerImg = loadImage('images/cursor_pointer.png');
-
-  button = createButton('Roll dices');
-  button.position(0, 0);
-  button.size(CELL_SIZE * 1.5, CELL_SIZE * 0.5);
-  button.mousePressed(buttonPressed);
-  button.hide();
+  otherPointerImg = loadImage('images/cursor_pointer.png',
+    () => { otherPointerImg.filter(INVERT); },
+    () => { console.log('Carrefull: there was an error loading an image.')}
+  );
 
   for (let i = 0; i < 14; ++i) {
     board[i] = [new Cell(new Vec2d(0, 0)), new Cell(new Vec2d(0, 0))]; //white cell & black cell
@@ -235,7 +258,11 @@ function preload()
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
-  otherPointerImg.filter(INVERT);
+  button = createButton('Roll dices');
+  button.position(0, 0);
+  button.size(CELL_SIZE * 1.5, CELL_SIZE * 0.5);
+  button.mousePressed(buttonPressed);
+  button.hide();
 
   theme = new ColorTheme(
     color(17, 17, 17), /* background color */
@@ -252,10 +279,6 @@ function setup() {
   );
 
   setCellsPos(); //setting up the tiles positions for black and white
-
-  board[0][0].isOccupied = true;
-  board[6][0].isOccupied = true;
-  board[7][1].isOccupied = true;
 
   /* socket */
   setPlayerState(DRAWING_DICE);
@@ -310,15 +333,17 @@ function isMouseInBound(pos, size)
 
 function mousePressed()
 {
-  //console.log('mouse pressed');
-
-  if (isMouseInBound(new Vec2d(topLeft.x + (CELL_SIZE * 4), topLeft.y), new Vec2d(CELL_SIZE, CELL_SIZE)) == true) {
-    console.log('btn1 blue pressed');
+  /* button blue */
+  if (isMouseInBound(new Vec2d(topLeft.x + (CELL_SIZE * 4), topLeft.y), new Vec2d(CELL_SIZE, CELL_SIZE))) {
     newPieceButtonClicked(1);
   }
-  
+  /* button red */
   if (isMouseInBound(new Vec2d(topLeft.x + (CELL_SIZE * 4), topLeft.y + (CELL_SIZE * 2)), new Vec2d(CELL_SIZE, CELL_SIZE))) {
-    console.log('btn red pressed');
     newPieceButtonClicked(0);
+  }
+
+  /* manage click on pieces */
+  for (let i = 0; i < 14; ++i) {
+    //todo
   }
 }
