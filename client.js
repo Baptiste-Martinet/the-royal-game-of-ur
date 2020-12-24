@@ -344,6 +344,6 @@ function mousePressed()
 
   /* manage click on pieces */
   for (let i = 0; i < 14; ++i) {
-    //todo
+    //todo yes
   }
 }
