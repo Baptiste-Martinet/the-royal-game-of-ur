@@ -56,6 +56,7 @@ class Button {
 
     this.isDisplayed = true;
     this.isClicked = false;
+    this.isEnabled = true;
   }
 
   setPosition(_x, _y) {
@@ -69,6 +70,14 @@ class Button {
 
   hide() {
     this.isDisplayed = false;
+  }
+
+  enable() {
+    this.isEnabled = true;
+  }
+
+  disable() {
+    this.isEnabled = false;
   }
 
   callTheCallbackFunction() {
@@ -228,6 +237,14 @@ function drawButton(button)
   fill(button.isHovered ? button.textHoverColor : button.textColor);
   noStroke();
   text(button.text, button.pos.x + button.size.x / 2, button.pos.y + button.size.y / 2);
+
+  /* enable/disable */
+  if (!button.isEnabled) {
+    strokeWeight(button.strokeSize);
+    stroke(0, 200);
+    fill(0, 200);
+    rect(button.pos.x, button.pos.y, button.size.x, button.size.y, 4);
+  }
 }
 
 function displayButtons()
