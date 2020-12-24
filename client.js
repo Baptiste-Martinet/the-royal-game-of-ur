@@ -64,6 +64,11 @@ class Button {
     this.pos.y = _y;
   }
 
+  setSize(_x, _y) {
+    this.size.x = _x;
+    this.size.y = _y;
+  }
+
   show() {
     this.isDisplayed = true;
   }
@@ -186,7 +191,7 @@ function drawNbPieces(player)
   drawPiece(pos, player.color);
   fill(255);
   noStroke();
-  textSize(32);
+  textSize(CELL_SIZE * 0.4);
   textAlign(CENTER, CENTER);
   text('7', pos.x + CELL_SIZE / 2, pos.y + CELL_SIZE / 2);
 }
@@ -232,7 +237,7 @@ function drawButton(button)
 
   /* text */
   textAlign(CENTER, CENTER);
-  textSize(20);
+  textSize(CELL_SIZE * 0.3);
   textStyle(BOLD);
   fill(button.isHovered ? button.textHoverColor : button.textColor);
   noStroke();
@@ -276,6 +281,7 @@ function setCellsPos()
   let currentPos = new Vec2d(3, 0);
 
   buttons[0].setPosition(topLeft.x, topLeft.y + (CELL_SIZE * 3.2));
+  buttons[0].setSize(CELL_SIZE * 1.2, CELL_SIZE * 0.5);
 
   for (let i = 0; i < 14; ++i) {
     board[i][BLACK].pos.x = topLeft.x + CELL_SIZE * currentPos.x;
@@ -441,9 +447,9 @@ function draw() {
   //drawMousePointer();
 
   /* DEBUG */
-  fill(255, 0, 0);
+  /*fill(255, 0, 0);
   noStroke();
-  ellipse(width / 2, height / 2, 30);
+  ellipse(width / 2, height / 2, 30);*/
 }
 
 function isMouseInBound(pos, sizeX, sizeY)
