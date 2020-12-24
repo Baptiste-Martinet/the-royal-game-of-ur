@@ -40,6 +40,59 @@ class ColorTheme {
   }
 }
 
+class Button {
+  constructor(_text, _callback, _pos, _size, _textColor, _color, _hoverColor, _textHoverColor, _strokeSize, _strokeColor, _strokeHoverColor) {
+    this.text = _text;
+    this.callback = _callback;
+    this.pos = _pos;
+    this.size = _size;
+    this.textColor = _textColor;
+    this.color = _color;
+    this.hoverColor = _hoverColor;
+    this.textHoverColor = _textHoverColor;
+    this.strokeSize = _strokeSize;
+    this.strokeColor = _strokeColor;
+    this.strokeHoverColor = _strokeHoverColor;
+
+    this.isDisplayed = true;
+    this.isClicked = false;
+  }
+
+  setPosition(_x, _y) {
+    this.pos.x = _x;
+    this.pos.y = _y;
+  }
+
+  show() {
+    this.isDisplayed = true;
+  }
+
+  hide() {
+    this.isDisplayed = false;
+  }
+
+  callTheCallbackFunction() {
+    if (this.isClicked) {
+      console.log(ERROR_MSG, 'Stop spamming my dude');
+      return;
+    }
+    this.isClicked = true;
+
+    let tmpStrokeHoverColor = color(this.strokeHoverColor);
+    let tmpStrokeColor = color(this.strokeColor);
+
+    this.strokeHoverColor = color(255);
+    this.strokeColor = color(255);
+
+    setTimeout(() => {
+      this.strokeHoverColor = tmpStrokeHoverColor;
+      this.strokeColor = tmpStrokeColor;
+      this.isClicked = false;
+    }, 200);
+    this.callback();
+  }
+}
+
 const CELL_SIZE = 80;
 const WHITE = 0;
 const BLACK = 1;
@@ -55,7 +108,7 @@ const ERROR_MSG = 'ERROR :';
 const INFO_MSG = 'INFO: ';
 
 var whosturn = -1;
-var players = [new Player(1), new Player(0)];
+var players = [new Player(0), new Player(1)];
 var board = new Array(14);
 var theme = null;
 
@@ -66,9 +119,8 @@ var totalDicesValue = -1;
 var playerState = WAITING;
 
 /* UI varaibles */
-var button;
 var otherPointerImg;
-
+var buttons;
 /* utils functions */
 
 function drawPiece(pos, color)
@@ -146,7 +198,7 @@ function drawTriangle(bottomLeftCoords, size)
 
 function displayDicesTriangles()
 {
-  let bottomLeft = new Vec2d(topLeft.x + (CELL_SIZE * 1.6), topLeft.y + (CELL_SIZE * 3.7));
+  let bottomLeft = new Vec2d(topLeft.x + (CELL_SIZE * 1.3), topLeft.y + (CELL_SIZE * 3.7));
   let triangleSize = CELL_SIZE * 0.6;
 
   for (let i = 0; i < 4; ++i) {
@@ -157,7 +209,33 @@ function displayDicesTriangles()
       noStroke();
       circle(bottomLeft.x + triangleSize / 2, bottomLeft.y - triangleSize * 0.35, triangleSize * 0.3);
     }
-    bottomLeft.x += triangleSize + 6;
+    bottomLeft.x += triangleSize + 8;
+  }
+}
+
+function drawButton(button)
+{
+  /* rect */
+  strokeWeight(button.strokeSize);
+  stroke(button.isHovered ? button.strokeHoverColor : button.strokeColor);
+  fill(button.isHovered ? button.hoverColor : button.color);
+  rect(button.pos.x, button.pos.y, button.size.x, button.size.y, 4);
+
+  /* text */
+  textAlign(CENTER, CENTER);
+  textSize(20);
+  textStyle(BOLD);
+  fill(button.isHovered ? button.textHoverColor : button.textColor);
+  noStroke();
+  text(button.text, button.pos.x + button.size.x / 2, button.pos.y + button.size.y / 2);
+}
+
+function displayButtons()
+{
+  for (let i = 0; i < 1; ++i) {
+    if (!buttons[i].isDisplayed)
+      continue;
+    drawButton(buttons[i]);
   }
 }
 
@@ -178,7 +256,7 @@ function setCellsPos()
   topLeft = new Vec2d(width / 2 - (CELL_SIZE * 4), height / 2 - (CELL_SIZE * 1.5));
   let currentPos = new Vec2d(3, 0);
 
-  button.position(topLeft.x, topLeft.y + (CELL_SIZE * 3.2));
+  buttons[0].setPosition(topLeft.x, topLeft.y + (CELL_SIZE * 3.2));
 
   for (let i = 0; i < 14; ++i) {
     board[i][BLACK].pos.x = topLeft.x + CELL_SIZE * currentPos.x;
@@ -202,23 +280,17 @@ function setPlayerState(state)
   playerState = state;
 
   if (playerState == DRAWING_DICE) {
-    button.show();
   } else if (state == MOVING) {
   } else {
-    button.hide();
   }
 }
 
 function buttonPressed()
 {
-  //button.elt.textContent = 'Skip turn';
-
   if (playerState != DRAWING_DICE) {
     console.log(ERROR_MSG, 'State doesnt match:', playerState)
     return;
   }
-
-  playerState = MOVING;
 
   totalDicesValue = 0;
   for (let i = 0; i < 4; ++i) {
@@ -226,6 +298,7 @@ function buttonPressed()
     totalDicesValue += diceValues[i];
   }
   console.log(INFO_MSG, 'totalDicesValue: ', totalDicesValue);
+  setPlayerState(MOVING);
 }
 
 function newPieceButtonClicked(color)
@@ -244,7 +317,7 @@ function newPieceButtonClicked(color)
   }
   console.log(INFO_MSG, 'Creating new piece.');
   board[totalDicesValue - 1][color].isOccupied = true;
-  playerState = WAITING;
+  setPlayerState(WAITING);
 }
 
 function movePiece(idx, who)
@@ -272,6 +345,8 @@ function movePiece(idx, who)
   } else {
     board[idx + totalDicesValue][who].isOccupied = true;
   }
+
+  setPlayerState(WAITING);
 }
 
 /* p5 functions */
@@ -286,16 +361,25 @@ function preload()
   for (let i = 0; i < 14; ++i) {
     board[i] = [new Cell(new Vec2d(0, 0)), new Cell(new Vec2d(0, 0))]; //white cell & black cell
   }
+
+  buttons = new Array(1);
+  buttons[0] = new Button(
+    'Roll', /* text */
+    buttonPressed, /* callback */
+    new Vec2d(0, 0), /* pos */
+    new Vec2d(CELL_SIZE * 1.2, CELL_SIZE * 0.5), /* size */
+    color(255), /* text color */
+    color(0, 0), /* color */
+    color(59, 196, 96), /* hover color */
+    color(255), /* text hover color */
+    3, /* stroke size */
+    color(59, 196, 96), /* stroke color */
+    color(59, 196, 96) /* stroke hover color */
+  );
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-
-  button = createButton('Roll dices');
-  button.position(0, 0);
-  button.size(CELL_SIZE * 1.5, CELL_SIZE * 0.5);
-  button.mousePressed(buttonPressed);
-  button.hide();
 
   theme = new ColorTheme(
     color(17, 17, 17), /* background color */
@@ -332,6 +416,7 @@ function draw() {
   displayHoveredCells();
   displayNbPieces();
   displayDicesTriangles();
+  displayButtons();
 
   /* test */
   //drawMousePointer();
@@ -342,44 +427,62 @@ function draw() {
   ellipse(width / 2, height / 2, 30);*/
 }
 
-function mouseMoved() {
-  for (let i = 0; i < 14; ++i) {
-    if (board[i][players[ME].color].pos.x < mouseX && mouseX < board[i][players[ME].color].pos.x + CELL_SIZE
-        && board[i][players[ME].color].pos.y < mouseY && mouseY < board[i][players[ME].color].pos.y + CELL_SIZE) {
-      if (board[i][players[ME].color].isHovered == false)
-        board[i][players[ME].color].isHovered = true;
-    } else if (board[i][players[ME].color].isHovered == true) {
-      board[i][players[ME].color].isHovered = false;
-    }
-  }
-  return false;
-}
-
-function isMouseInBound(pos, size)
+function isMouseInBound(pos, sizeX, sizeY)
 {
-  if (pos.x < mouseX && mouseX < pos.x + size.x
-    && pos.y < mouseY && mouseY < pos.y + size.y) {
+  if (pos.x < mouseX && mouseX < pos.x + sizeX
+    && pos.y < mouseY && mouseY < pos.y + sizeY) {
       return true;
     }
   return false;
 }
 
+function mouseMoved() {
+  for (let i = 0; i < 14; ++i) {
+    if (isMouseInBound(board[i][players[ME].color].pos, CELL_SIZE, CELL_SIZE)) {
+      if (board[i][players[ME].color].isHovered == false) {
+        board[i][players[ME].color].isHovered = true;
+        break;
+      }
+    } else if (board[i][players[ME].color].isHovered == true) {
+      board[i][players[ME].color].isHovered = false;
+    }
+  }
+
+  for (let i = 0; i < 1; ++i) {
+    if (buttons[i].isDisplayed && isMouseInBound(buttons[i].pos, buttons[i].size.x, buttons[i].size.y)) {
+      if (!buttons[i].isHovered)
+        buttons[i].isHovered = true;
+    } else if (buttons[i].isHovered) {
+        buttons[i].isHovered = false;
+    }
+  }
+  return false;
+}
+
 function mousePressed()
 {
-  let vecCellSize = new Vec2d(CELL_SIZE, CELL_SIZE);
   /* button blue */
-  if (isMouseInBound(new Vec2d(topLeft.x + (CELL_SIZE * 4), topLeft.y), vecCellSize)) {
+  if (isMouseInBound(new Vec2d(topLeft.x + (CELL_SIZE * 4), topLeft.y), CELL_SIZE, CELL_SIZE)) {
     newPieceButtonClicked(1);
   }
   /* button red */
-  if (isMouseInBound(new Vec2d(topLeft.x + (CELL_SIZE * 4), topLeft.y + (CELL_SIZE * 2)), vecCellSize)) {
+  if (isMouseInBound(new Vec2d(topLeft.x + (CELL_SIZE * 4), topLeft.y + (CELL_SIZE * 2)), CELL_SIZE, CELL_SIZE)) {
     newPieceButtonClicked(0);
   }
 
   /* manage click on pieces */
   for (let i = 0; i < 14; ++i) {
-    if (isMouseInBound(board[i][players[ME].color].pos, vecCellSize)) {
+    if (isMouseInBound(board[i][players[ME].color].pos, CELL_SIZE, CELL_SIZE)) {
       movePiece(i, players[ME].color);
+      break;
+    }
+  }
+
+  /* manage click on buttons */
+  for (let i = 0; i < 1; ++i) {
+    if (buttons[i].isDisplayed && isMouseInBound(buttons[i].pos, buttons[i].size.x, buttons[i].size.y)) {
+      buttons[i].callTheCallbackFunction();
+      break;
     }
   }
 }
