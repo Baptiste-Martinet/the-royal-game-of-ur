@@ -1,6 +1,6 @@
 class Player {
   constructor (_color) {
-    this.name = 'baptiste';
+    this.pseudo = 'baptiste';
     this.color = _color; //0=white, 1=black
     this.nbPieces = 7;
   }
@@ -62,7 +62,8 @@ var totalDicesValue = -1;
 var playerState = WAITING;
 
 /* UI varaibles */
-var button = null;
+var button;
+var otherPointerImg;
 
 /* utils functions */
 
@@ -156,6 +157,18 @@ function displayDicesTriangles()
   }
 }
 
+function drawMousePointer()
+{
+  let pointerSize = CELL_SIZE * 0.12;
+  image(otherPointerImg, mouseX, mouseY - 60, pointerSize, pointerSize * 1.6);
+  noStroke();
+  fill(255);
+  textAlign(LEFT, TOP);
+  textSize(10);
+  textStyle(BOLD)
+  text(players[HIM].pseudo, mouseX + 15, mouseY - 60 + 15);
+}
+
 function setCellsPos()
 {
   topLeft = new Vec2d(width / 2 - (CELL_SIZE * 4), height / 2 - (CELL_SIZE * 1.5));
@@ -197,16 +210,32 @@ function buttonPressed()
   button.elt.textContent = 'Skip turn';
 }
 
+function newPieceButtonClicked(color)
+{
+  console.log('create new piece for color', color)
+}
+
 /* p5 functions */
 
-function setup() {
-  createCanvas(windowWidth, windowHeight);
+function preload()
+{
+  otherPointerImg = loadImage('images/cursor_pointer.png');
 
   button = createButton('Roll dices');
   button.position(0, 0);
   button.size(CELL_SIZE * 1.5, CELL_SIZE * 0.5);
   button.mousePressed(buttonPressed);
   button.hide();
+
+  for (let i = 0; i < 14; ++i) {
+    board[i] = [new Cell(new Vec2d(0, 0)), new Cell(new Vec2d(0, 0))]; //white cell & black cell
+  }
+}
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+
+  otherPointerImg.filter(INVERT);
 
   theme = new ColorTheme(
     color(17, 17, 17), /* background color */
@@ -222,14 +251,12 @@ function setup() {
     2, /* dice triangle stroke size */
   );
 
-  for (let i = 0; i < 14; ++i) {
-    board[i] = [new Cell(new Vec2d(0, 0)), new Cell(new Vec2d(0, 0))]; //white cell & black cell
-  }
   setCellsPos(); //setting up the tiles positions for black and white
 
   board[0][0].isOccupied = true;
   board[6][0].isOccupied = true;
   board[7][1].isOccupied = true;
+
   /* socket */
   setPlayerState(DRAWING_DICE);
 }
@@ -250,6 +277,9 @@ function draw() {
   displayNbPieces();
   displayDicesTriangles();
 
+  /* test */
+  //drawMousePointer();
+
   /* DEBUG */
   /*fill(255, 0, 0);
   noStroke();
@@ -267,4 +297,28 @@ function mouseMoved() {
     }
   }
   return false;
+}
+
+function isMouseInBound(pos, size)
+{
+  if (pos.x < mouseX && mouseX < pos.x + size.x
+    && pos.y < mouseY && mouseY < pos.y + size.y) {
+      return true;
+    }
+  return false;
+}
+
+function mousePressed()
+{
+  //console.log('mouse pressed');
+
+  if (isMouseInBound(new Vec2d(topLeft.x + (CELL_SIZE * 4), topLeft.y), new Vec2d(CELL_SIZE, CELL_SIZE)) == true) {
+    console.log('btn1 blue pressed');
+    newPieceButtonClicked(1);
+  }
+  
+  if (isMouseInBound(new Vec2d(topLeft.x + (CELL_SIZE * 4), topLeft.y + (CELL_SIZE * 2)), new Vec2d(CELL_SIZE, CELL_SIZE))) {
+    console.log('btn red pressed');
+    newPieceButtonClicked(0);
+  }
 }
