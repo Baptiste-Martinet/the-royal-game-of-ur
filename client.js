@@ -102,7 +102,7 @@ class Button {
   }
 }
 
-const CELL_SIZE = 80;
+var CELL_SIZE = 80;
 const WHITE = 0;
 const BLACK = 1;
 
@@ -270,6 +270,8 @@ function drawMousePointer()
 
 function setCellsPos()
 {
+  CELL_SIZE = width / 16;
+
   topLeft = new Vec2d(width / 2 - (CELL_SIZE * 4), height / 2 - (CELL_SIZE * 1.5));
   let currentPos = new Vec2d(3, 0);
 
@@ -439,9 +441,9 @@ function draw() {
   //drawMousePointer();
 
   /* DEBUG */
-  /*fill(255, 0, 0);
+  fill(255, 0, 0);
   noStroke();
-  ellipse(width / 2, height / 2, 30);*/
+  ellipse(width / 2, height / 2, 30);
 }
 
 function isMouseInBound(pos, sizeX, sizeY)
