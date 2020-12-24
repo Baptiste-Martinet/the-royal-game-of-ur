@@ -3,6 +3,7 @@ class Player {
     this.pseudo = 'baptiste';
     this.color = _color; //0=white, 1=black
     this.nbPieces = 7;
+    this.score = 0;
   }
 }
 
@@ -54,7 +55,7 @@ const ERROR_MSG = 'ERROR :';
 const INFO_MSG = 'INFO: ';
 
 var whosturn = -1;
-var players = [new Player(0), new Player(1)];
+var players = [new Player(1), new Player(0)];
 var board = new Array(14);
 var theme = null;
 
@@ -237,8 +238,40 @@ function newPieceButtonClicked(color)
     console.log(ERROR_MSG, 'State not matching:', playerState);
     return;
   }
+  if (board[totalDicesValue - 1][color].isOccupied == true) {
+    console.log(ERROR_MSG, 'Can not place piece here:', 'Cell is already occupied');
+    return;
+  }
+  console.log(INFO_MSG, 'Creating new piece.');
   board[totalDicesValue - 1][color].isOccupied = true;
   playerState = WAITING;
+}
+
+function movePiece(idx, who)
+{
+  if (playerState != MOVING) {
+    console.log(ERROR_MSG, 'State not matching:', playerState);
+    return;
+  }
+  if (idx + totalDicesValue > 14) {
+    console.log(ERROR_MSG, 'Can not move outside the board');
+    return;
+  }
+  if (board[idx][who].isOccupied == false) {
+    console.log(ERROR_MSG, 'Cell is empty');
+    return;
+  }
+  if (board[idx + totalDicesValue][who].isOccupied == true) {
+    console.log(ERROR_MSG, 'Can not move here:', 'Cell is already occupied');
+    return;
+  }
+  board[idx][who].isOccupied = false;
+
+  if (idx + totalDicesValue == 14) {
+    players[who].score++;
+  } else {
+    board[idx + totalDicesValue][who].isOccupied = true;
+  }
 }
 
 /* p5 functions */
@@ -333,17 +366,20 @@ function isMouseInBound(pos, size)
 
 function mousePressed()
 {
+  let vecCellSize = new Vec2d(CELL_SIZE, CELL_SIZE);
   /* button blue */
-  if (isMouseInBound(new Vec2d(topLeft.x + (CELL_SIZE * 4), topLeft.y), new Vec2d(CELL_SIZE, CELL_SIZE))) {
+  if (isMouseInBound(new Vec2d(topLeft.x + (CELL_SIZE * 4), topLeft.y), vecCellSize)) {
     newPieceButtonClicked(1);
   }
   /* button red */
-  if (isMouseInBound(new Vec2d(topLeft.x + (CELL_SIZE * 4), topLeft.y + (CELL_SIZE * 2)), new Vec2d(CELL_SIZE, CELL_SIZE))) {
+  if (isMouseInBound(new Vec2d(topLeft.x + (CELL_SIZE * 4), topLeft.y + (CELL_SIZE * 2)), vecCellSize)) {
     newPieceButtonClicked(0);
   }
 
   /* manage click on pieces */
   for (let i = 0; i < 14; ++i) {
-    //todo yes
+    if (isMouseInBound(board[i][players[ME].color].pos, vecCellSize)) {
+      movePiece(i, players[ME].color);
+    }
   }
 }
