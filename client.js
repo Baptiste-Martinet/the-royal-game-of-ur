@@ -152,7 +152,7 @@ function drawCell(cell)
   stroke(theme.grid);
   strokeWeight(2);
   fill(theme.cells);
-  square(cell.pos.x, cell.pos.y, CELL_SIZE, theme.cellCornerRadius);
+  square(cell.pos.x, cell.pos.y, CELL_SIZE, CELL_SIZE * (theme.cellCornerRadius / 80));
 }
 
 function displayBoard()
@@ -179,7 +179,7 @@ function displayHoveredCells()
     if (board[i][players[ME].color].isHovered) {
       noStroke();
       fill(theme.hoveredCells);
-      square(board[i][players[ME].color].pos.x, board[i][players[ME].color].pos.y, CELL_SIZE, theme.cellCornerRadius);
+      square(board[i][players[ME].color].pos.x, board[i][players[ME].color].pos.y, CELL_SIZE, CELL_SIZE * (theme.cellCornerRadius / 80));
     }
   }
 }
@@ -280,6 +280,7 @@ function setCellsPos()
   topLeft = new Vec2d(width / 2 - (CELL_SIZE * 4), height / 2 - (CELL_SIZE * 1.5));
   let currentPos = new Vec2d(3, 0);
 
+  /* update buttons */
   buttons[0].setPosition(topLeft.x, topLeft.y + (CELL_SIZE * 3.2));
   buttons[0].setSize(CELL_SIZE * 1.2, CELL_SIZE * 0.5);
 
