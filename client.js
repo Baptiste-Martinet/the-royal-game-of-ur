@@ -275,14 +275,7 @@ function drawMousePointer()
 
 function setCellsPos()
 {
-  CELL_SIZE = width / 16;
-
-  topLeft = new Vec2d(width / 2 - (CELL_SIZE * 4), height / 2 - (CELL_SIZE * 1.5));
   let currentPos = new Vec2d(3, 0);
-
-  /* update buttons */
-  buttons[0].setPosition(topLeft.x, topLeft.y + (CELL_SIZE * 3.2));
-  buttons[0].setSize(CELL_SIZE * 1.2, CELL_SIZE * 0.5);
 
   for (let i = 0; i < 14; ++i) {
     board[i][BLACK].pos.x = topLeft.x + CELL_SIZE * currentPos.x;
@@ -299,6 +292,19 @@ function setCellsPos()
       currentPos.x++;
     }
   }
+}
+
+function manageResponsive()
+{
+  CELL_SIZE = width / 16; //Global variable storing the size of a Cell
+  topLeft = new Vec2d(width / 2 - (CELL_SIZE * 4), height / 2 - (CELL_SIZE * 1.5)); //Topleft coords of the board
+
+  /* update buttons */
+  buttons[0].setPosition(topLeft.x, topLeft.y + (CELL_SIZE * 3.2));
+  buttons[0].setSize(CELL_SIZE * 1.2, CELL_SIZE * 0.5);
+
+  /* update cell positions */
+  setCellsPos();
 }
 
 function setPlayerState(state)
@@ -398,7 +404,7 @@ function preload()
     color(0, 0), /* color */
     color(59, 196, 96), /* hover color */
     color(255), /* text hover color */
-    3, /* stroke size */
+    2.4, /* stroke size */
     color(59, 196, 96), /* stroke color */
     color(59, 196, 96) /* stroke hover color */
   );
@@ -421,7 +427,7 @@ function setup() {
     2, /* dice triangle stroke size */
   );
 
-  setCellsPos(); //setting up the tiles positions for black and white
+  manageResponsive();
 
   /* socket */
   setPlayerState(DRAWING_DICE);
@@ -429,7 +435,7 @@ function setup() {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  setCellsPos();
+  manageResponsive();
 }
 
 function draw() {
