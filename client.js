@@ -135,6 +135,7 @@ var playerState = WAITING;
 /* UI varaibles */
 var otherPointerImg;
 var buttons;
+const NB_BUTTONS = 1;
 /* utils functions */
 
 function drawPiece(pos, color)
@@ -254,7 +255,7 @@ function drawButton(button)
 
 function displayButtons()
 {
-  for (let i = 0; i < 1; ++i) {
+  for (let i = 0; i < NB_BUTTONS; ++i) {
     if (!buttons[i].isDisplayed)
       continue;
     drawButton(buttons[i]);
@@ -394,7 +395,7 @@ function preload()
     board[i] = [new Cell(new Vec2d(0, 0)), new Cell(new Vec2d(0, 0))]; //white cell & black cell
   }
 
-  buttons = new Array(1);
+  buttons = new Array(NB_BUTTONS);
   buttons[0] = new Button(
     'Roll', /* text */
     buttonPressed, /* callback */
@@ -480,7 +481,7 @@ function mouseMoved() {
     }
   }
 
-  for (let i = 0; i < 1; ++i) {
+  for (let i = 0; i < NB_BUTTONS; ++i) {
     if (buttons[i].isDisplayed && isMouseInBound(buttons[i].pos, buttons[i].size.x, buttons[i].size.y)) {
       if (!buttons[i].isHovered)
         buttons[i].isHovered = true;
@@ -511,7 +512,7 @@ function mousePressed()
   }
 
   /* manage click on buttons */
-  for (let i = 0; i < 1; ++i) {
+  for (let i = 0; i < NB_BUTTONS; ++i) {
     if (buttons[i].isDisplayed && isMouseInBound(buttons[i].pos, buttons[i].size.x, buttons[i].size.y)) {
       buttons[i].callTheCallbackFunction();
       break;
