@@ -1,0 +1,35 @@
+{
+  "name": "the-royal-game-of-ur",
+  "version": "1.0.0",
+  "description": "A web multiplayer implementation of the famous Royal Game Of Ur",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Baptiste-Martinet/the-royal-game-of-ur.git"
+  },
+  "keywords": [
+    "royal",
+    "game",
+    "of",
+    "ur",
+    "node",
+    "js",
+    "nodejs",
+    "multiplayer",
+    "web"
+  ],
+  "author": "Baptiste Martinet",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Baptiste-Martinet/the-royal-game-of-ur/issues"
+  },
+  "homepage": "https://github.com/Baptiste-Martinet/the-royal-game-of-ur#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^3.0.4"
+  }
+}
