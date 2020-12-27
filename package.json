@@ -30,6 +30,7 @@
   "homepage": "https://github.com/Baptiste-Martinet/the-royal-game-of-ur#readme",
   "dependencies": {
     "express": "^4.17.1",
-    "socket.io": "^3.0.4"
+    "socket.io": "^3.0.4",
+    "uuid": "^8.3.2"
   }
 }
