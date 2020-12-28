@@ -1,16 +1,17 @@
+class Vec2d {
+  constructor (_x, _y) {
+    this.x = _x;
+    this.y = _y;
+  }
+}
+
 class Player {
   constructor (_color) {
     this.pseudo = 'baptiste';
     this.color = _color; //0=white, 1=black
     this.nbPieces = 7;
     this.score = 0;
-  }
-}
-
-class Vec2d {
-  constructor (_x, _y) {
-    this.x = _x;
-    this.y = _y;
+    this.mousePos = new Vec2d(0, 0);
   }
 }
 
@@ -266,16 +267,17 @@ function displayButtons()
   }
 }
 
-function drawMousePointer()
+function drawMousePointer(name, pos)
 {
   let pointerSize = CELL_SIZE * 0.12;
-  image(otherPointerImg, mouseX, mouseY - 60, pointerSize, pointerSize * 1.6);
+
+  image(otherPointerImg, pos.x, pos.y, pointerSize, pointerSize * 1.6);
   noStroke();
   fill(255);
   textAlign(LEFT, TOP);
   textSize(10);
-  textStyle(BOLD)
-  text(players[HIM].pseudo, mouseX + 15, mouseY - 60 + 15);
+  textStyle(BOLD);
+  text(name, pos.x + 15, pos.y + 15);
 }
 
 function setCellsPos()
@@ -413,9 +415,6 @@ function preload()
     color(59, 196, 96), /* stroke color */
     color(59, 196, 96) /* stroke hover color */
   );
-
-  /* socket initialization */
-  socket = io.connect();
 }
 
 function setup() {
@@ -438,7 +437,35 @@ function setup() {
   manageResponsive();
 
   /* socket */
-  setPlayerState(DRAWING_DICE);
+  socket = io.connect();
+  console.log('Connected');
+
+  socket.on('connect', function() {
+    console.log('Socket status', socket.connected);
+
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    if (urlParams.has('roomId')) {
+      /* JOIN ROOM */
+      const roomId = urlParams.get('roomId');
+      console.log('Got from URL:', roomId);
+      socket.emit('joinRoom', roomId);
+    } else {
+      /* CREATE ROOM */
+      socket.emit('createRoom');
+    }
+
+    /* socket events */
+
+    socket.on('joinedRoom', (roomId) => {
+      window.location.href = window.location.href + "?roomId=" + roomId;
+    });
+
+    socket.on('eventMouseMoved', (mX, mY) => {
+      players[HIM].mousePos.x = mX;
+      players[HIM].mousePos.y = mY;
+    });
+  });
 }
 
 function windowResized() {
@@ -457,9 +484,7 @@ function draw() {
   displayNbPieces();
   displayDicesTriangles();
   displayButtons();
-
-  /* test */
-  //drawMousePointer();
+  drawMousePointer('Player2', players[HIM].mousePos);
 
   /* DEBUG */
   /*fill(255, 0, 0);
@@ -496,6 +521,10 @@ function mouseMoved() {
         buttons[i].isHovered = false;
     }
   }
+
+  /* socket interaction */
+  if (socket && socket.connected)
+    socket.emit('sendMouseMoved', mouseX, mouseY);
   return false;
 }
 

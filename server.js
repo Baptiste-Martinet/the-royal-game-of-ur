@@ -41,17 +41,24 @@ io.sockets.on('connection', (socket) => {
     var myRoom = undefined;
 
     socket.on('createRoom', () => {
-        let newRoom = new Room(uuidv4()); //creer la room
-        rooms.push(newRoom); //la stocker dans un array
-        socket.emit('joinedRoom', myRoom); //envoyer l'event au client qu'il peu rejoindre la room
+        let newRoomId = uuidv4();
+        rooms.push(new Room(newRoomId)); //la stocker dans un array
+        console.log('New room created with id', newRoomId);
+        socket.emit('joinedRoom', newRoomId); //envoyer l'event au client qu'il peu rejoindre la room
     });
 
-    socket.on('connectToRoom', (id) => {
+    socket.on('joinRoom', (id) => {
         if (!(myRoom = getRoomById(id))) {
             console.log('User tried to connect to non existent room', id);
             return;
         }
         socket.join(myRoom.id);
+    });
+
+    socket.on('sendMouseMoved', (mouseX, mouseY) => {
+        if (myRoom === undefined)
+            return;
+        socket.to(myRoom.id).emit("eventMouseMoved", mouseX, mouseY);
     });
 
     socket.on('disconnect', () => {
