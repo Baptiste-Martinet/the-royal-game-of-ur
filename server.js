@@ -38,7 +38,7 @@ function getRoomById(id)
 io.sockets.on('connection', (socket) => {
     console.log('new user:', socket.id);
 
-    var myRoom = undefined;
+    var myRoom = null;
 
     socket.on('createRoom', () => {
         let newRoomId = uuidv4();
@@ -55,16 +55,16 @@ io.sockets.on('connection', (socket) => {
         socket.join(myRoom.id);
     });
 
-    socket.on('sendMouseMoved', (mouseX, mouseY) => {
-        if (myRoom === undefined)
+    socket.on('sendMouseMoved', (mouseX, mouseY, CELL_SIZE) => {
+        if (myRoom === null)
             return;
-        socket.to(myRoom.id).emit("eventMouseMoved", mouseX, mouseY);
+        socket.to(myRoom.id).emit("eventMouseMoved", mouseX, mouseY, CELL_SIZE);
     });
 
     socket.on('disconnect', () => {
         console.log('User disconnected.', socket.id);
 
-        if (myRoom === undefined) {
+        if (myRoom === null) {
             return;
         }
         /* TODO room interaction */

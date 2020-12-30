@@ -125,10 +125,10 @@ const INFO_MSG = 'INFO: ';
 var whosturn = -1;
 var players = [new Player(0), new Player(1)];
 var board = new Array(14);
-var theme = null;
+var theme;
 
 /* game variables */
-var topLeft = null;
+var topLeft;
 var diceValues = [0, 0, 0, 0];
 var totalDicesValue = -1;
 var playerState = WAITING;
@@ -269,15 +269,15 @@ function displayButtons()
 
 function drawMousePointer(name, pos)
 {
-  let pointerSize = CELL_SIZE * 0.12;
+  let pointerSize = CELL_SIZE * 0.09;
 
   image(otherPointerImg, pos.x, pos.y, pointerSize, pointerSize * 1.6);
   noStroke();
   fill(255);
   textAlign(LEFT, TOP);
-  textSize(10);
+  textSize(pointerSize);
   textStyle(BOLD);
-  text(name, pos.x + 15, pos.y + 15);
+  text(name, pos.x + pointerSize * 1.6, pos.y + pointerSize * 1.6);
 }
 
 function setCellsPos()
@@ -461,9 +461,9 @@ function setup() {
       window.location.href = window.location.href + "?roomId=" + roomId;
     });
 
-    socket.on('eventMouseMoved', (mX, mY) => {
-      players[HIM].mousePos.x = mX;
-      players[HIM].mousePos.y = mY;
+    socket.on('eventMouseMoved', (mX, mY, cellSize) => {
+      players[HIM].mousePos.x = topLeft.x + (mX * (CELL_SIZE / cellSize));
+      players[HIM].mousePos.y = topLeft.y + (mY * (CELL_SIZE / cellSize));
     });
   });
 }
@@ -524,7 +524,7 @@ function mouseMoved() {
 
   /* socket interaction */
   if (socket && socket.connected)
-    socket.emit('sendMouseMoved', mouseX, mouseY);
+    socket.emit('sendMouseMoved', mouseX - topLeft.x, mouseY - topLeft.y, CELL_SIZE);
   return false;
 }
 
