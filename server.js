@@ -19,6 +19,7 @@ const { v4: uuidv4 } = require('uuid');
 class Room {
     constructor(_id) {
         this.id = _id;
+        this.nbPlayers = 0;
     }
 }
 
@@ -52,7 +53,9 @@ io.sockets.on('connection', (socket) => {
             console.log('User tried to connect to non existent room', id);
             return;
         }
+        myRoom.nbPlayers++;
         socket.join(myRoom.id);
+        console.log('User', socket.id, 'has joined room', myRoom.id, '. The room contains', myRoom.nbPlayers, 'player');
     });
 
     socket.on('sendMouseMoved', (mouseX, mouseY, CELL_SIZE) => {
@@ -67,6 +70,13 @@ io.sockets.on('connection', (socket) => {
         if (myRoom === null) {
             return;
         }
-        /* TODO room interaction */
+        myRoom.nbPlayers--;
+        if (myRoom.nbPlayers <= 0) {
+          let idx;
+          if ((idx = rooms.indexOf(myRoom)) != -1) {
+            console.log('Room', myRoom.id, 'has been deleted due to inactivity');
+            rooms.splice(idx, 1);
+          }
+        }
     });
 });
