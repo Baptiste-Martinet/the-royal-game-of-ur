@@ -148,7 +148,7 @@ function drawPiece(pos, color)
   let p5PieceColor = theme.pieceColors[color];
 
   stroke(red(p5PieceColor), green(p5PieceColor), green(p5PieceColor), 180);
-  strokeWeight(6);
+  strokeWeight(CELL_SIZE * 0.075);
   fill(p5PieceColor);
   circle(pos.x + CELL_SIZE / 2, pos.y + CELL_SIZE / 2, CELL_SIZE * 0.7);
 }
