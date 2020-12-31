@@ -133,12 +133,14 @@ var diceValues = [0, 0, 0, 0];
 var totalDicesValue = -1;
 var playerState = WAITING;
 
-/* UI varaibles */
+/* UI variables */
+var canvas;
 var otherPointerImg;
 var buttons;
 const NB_BUTTONS = 1;
 
 var spanUrl;
+var spanError;
 
 /* web socket */
 var socket;
@@ -420,7 +422,7 @@ function preload()
 }
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  canvas = createCanvas(windowWidth, windowHeight);
 
   theme = new ColorTheme(
     color(17, 17, 17), /* background color */
@@ -448,6 +450,20 @@ function setup() {
   spanUrl.style('padding', '10px');
   spanUrl.style('border-radius', '15px');
   spanUrl.style('user-select', 'none');
+  spanUrl.hide();
+
+  spanError = createSpan('🖧 Could not find the room you are looking for');
+  spanError.position(0, 0);
+  spanError.style('top:50%;left:50%;transform: translate(-50%, -50%)');
+  spanError.style('color', 'white');
+  spanError.style('background-color', '#ff6161');
+  spanError.style('padding', '1vw');
+  spanError.style('border-radius', '1vw');
+  spanError.style('font-weight', 'bold');
+  spanError.style('font-size', '1.8vw');
+  spanError.style('font-family', 'monospace');
+  spanError.style('user-select', 'none');
+  spanError.hide();
 
   /* socket */
   socket = io.connect();
@@ -477,6 +493,18 @@ function setup() {
     socket.on('eventMouseMoved', (mX, mY, cellSize) => {
       players[HIM].mousePos.x = topLeft.x + (mX * (CELL_SIZE / cellSize));
       players[HIM].mousePos.y = topLeft.y + (mY * (CELL_SIZE / cellSize));
+    });
+
+    socket.on('joinSuccess', () => {
+      spanUrl.show();
+      setTimeout(() => {
+        spanUrl.hide();
+      }, 20000);
+    });
+
+    socket.on('joinError', () => {
+      canvas.hide();
+      spanError.show();
     });
   });
 }

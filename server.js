@@ -51,10 +51,12 @@ io.sockets.on('connection', (socket) => {
     socket.on('joinRoom', (id) => {
         if (!(myRoom = getRoomById(id))) {
             console.log('User tried to connect to non existent room', id);
+            socket.emit('joinError');
             return;
         }
         myRoom.nbPlayers++;
         socket.join(myRoom.id);
+        socket.emit('joinSuccess');
         console.log('User', socket.id, 'has joined room', myRoom.id, '. The room contains', myRoom.nbPlayers, 'player');
     });
 
