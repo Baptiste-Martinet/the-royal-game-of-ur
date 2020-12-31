@@ -11,7 +11,7 @@ class Player {
     this.color = _color; //0=white, 1=black
     this.nbPieces = 7;
     this.score = 0;
-    this.mousePos = new Vec2d(0, 0);
+    this.mousePos = new Vec2d(-100, -100);
   }
 }
 
@@ -137,6 +137,8 @@ var playerState = WAITING;
 var otherPointerImg;
 var buttons;
 const NB_BUTTONS = 1;
+
+var spanUrl;
 
 /* web socket */
 var socket;
@@ -436,6 +438,17 @@ function setup() {
 
   manageResponsive();
 
+  spanUrl = createSpan('☝ SHARE THIS URL WITH A FRIEND <span style="cursor: pointer;" onclick="copyURLToClipBoard()">📋</span>');
+  spanUrl.position(150, 20);
+  spanUrl.style('color', 'black');
+  spanUrl.style('font-family', 'monospace');
+  spanUrl.style('font-weight', 'bold');
+  spanUrl.style('font-size', '1vw');
+  spanUrl.style('background-color', 'white');
+  spanUrl.style('padding', '10px');
+  spanUrl.style('border-radius', '15px');
+  spanUrl.style('user-select', 'none');
+
   /* socket */
   socket = io.connect();
   console.log('Connected');
@@ -554,4 +567,20 @@ function mousePressed()
       break;
     }
   }
+}
+
+/* not p5 */
+
+function copyURLToClipBoard()
+{
+  let dummy = document.createElement('input');
+  let text = window.location.href;
+  
+  document.body.appendChild(dummy);
+  dummy.value = text;
+  dummy.select();
+  document.execCommand('copy');
+  document.body.removeChild(dummy);
+
+  console.log('URL copied to the ClipBoard:', text);
 }
