@@ -99,8 +99,8 @@ io.sockets.on('connection', (socket) => {
       socket.to(myRoom.id).emit('receiveDiceValues', diceValues, totalDicesValue);
     });
 
-    socket.on('sendBoardMoves', (moves) => {
-      socket.to(myRoom.id).emit('receiveBoardMoves', moves);
+    socket.on('sendBoard', (board) => {
+      socket.to(myRoom.id).emit('receiveBoard', board);
     });
 
     socket.on('sendNbPieces', (nbPieces) => {

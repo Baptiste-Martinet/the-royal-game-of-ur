@@ -352,7 +352,12 @@ function buttonPressed()
   socket.emit('sendDiceValues', diceValues, totalDicesValue);
 
   /* player state */
-  setPlayerState(MOVING);
+  if (totalDicesValue > 0) {
+    setPlayerState(MOVING);
+  } else {
+    setPlayerState(WAITING);
+    socket.emit('nextTurn');
+  }
 }
 
 function newPieceButtonClicked(color)
@@ -378,7 +383,7 @@ function newPieceButtonClicked(color)
   players[ME].nbPieces--;
 
   /* network */
-  socket.emit('sendBoardMoves', [{color: players[ME].color, idx: totalDicesValue - 1, isOccupied: true}]);
+  socket.emit('sendBoard', board);
   socket.emit('sendNbPieces', players[ME].nbPieces);
   socket.emit('nextTurn');
 
@@ -550,11 +555,10 @@ function setup() {
       totalDicesValue = _totalDicesValue;
     });
 
-    socket.on('receiveBoardMoves', (moves) => {
-      let nbMoves = moves.length;
-
-      for (let i = 0; i < nbMoves; ++i) {
-        board[moves[i].idx][moves[i].color].isOccupied = moves[i].isOccupied;
+    socket.on('receiveBoard', (_board) => {
+      for (let i = 0; i < 14; ++i) {
+        board[i][ME].isOccupied = _board[i][ME].isOccupied;
+        board[i][HIM].isOccupied = _board[i][HIM].isOccupied;
       }
     });
 
