@@ -24,6 +24,7 @@ class Room {
     constructor(_id) {
         this.id = _id;
         this.players = [];
+        this.whosPlaying = Math.floor(Math.random() * 2);
     }
 }
 
@@ -65,7 +66,7 @@ io.sockets.on('connection', (socket) => {
         console.log('User', socket.id, 'has joined room', myRoom.id, '. The room contains', myRoom.players.length, 'player');
 
         if (myRoom.players.length == 2) {
-          io.to(myRoom.players[Math.floor(Math.random() * 2)]).emit('setPlayerState', DRAWING_DICE);
+          io.to(myRoom.players[myRoom.whosPlaying]).emit('setPlayerState', DRAWING_DICE);
         }
     });
 
@@ -95,9 +96,20 @@ io.sockets.on('connection', (socket) => {
     });
 
     /* GAME NETWORK */
-
-
     socket.on('sendDiceValues', (diceValues, totalDicesValue) => {
       socket.to(myRoom.id).emit('receiveDiceValues', diceValues, totalDicesValue);
+    });
+
+    socket.on('sendBoardMoves', (moves) => {
+      socket.to(myRoom.id).emit('receiveBoardMoves', moves);
+    });
+
+    socket.on('sendNbPieces', (nbPieces) => {
+      socket.to(myRoom.id).emit('receiveNbPieces', nbPieces);
+    });
+
+    socket.on('nextTurn', () => {
+      //myRoom.whosPlaying = (myRoom.whosPlaying == 1 ? 0 : 1);
+      socket.to(myRoom.id).emit('setPlayerState', DRAWING_DICE);
     });
 });

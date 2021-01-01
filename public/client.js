@@ -203,7 +203,7 @@ function drawNbPieces(player)
   noStroke();
   textSize(CELL_SIZE * 0.4);
   textAlign(CENTER, CENTER);
-  text('7', pos.x + CELL_SIZE / 2, pos.y + CELL_SIZE / 2);
+  text(player.nbPieces, pos.x + CELL_SIZE / 2, pos.y + CELL_SIZE / 2);
 }
 
 function displayNbPieces()
@@ -323,9 +323,14 @@ function setPlayerState(state)
   playerState = state;
 
   if (playerState == DRAWING_DICE) {
+    diceValues.fill(0);
+    totalDicesValue = -1;
     buttons[0].enable();
   } else if (state == MOVING) {
+    buttons[0].disable();
   } else {
+    diceValues.fill(0);
+    totalDicesValue = -1;
   }
 }
 
@@ -364,8 +369,20 @@ function newPieceButtonClicked(color)
     console.log(ERROR_MSG, 'Can not place piece here:', 'Cell is already occupied');
     return;
   }
+  if (players[ME].nbPieces <= 0) {
+    console.log(ERROR_MSG, 'No more pieces');
+    return;
+  }
   console.log(INFO_MSG, 'Creating new piece.');
   board[totalDicesValue - 1][color].isOccupied = true;
+  players[ME].nbPieces--;
+
+  /* network */
+  socket.emit('sendBoardMoves', [{color: players[ME].color, idx: totalDicesValue - 1, isOccupied: true}]);
+  socket.emit('sendNbPieces', players[ME].nbPieces);
+  socket.emit('nextTurn');
+
+  /* player state */
   setPlayerState(WAITING);
 }
 
@@ -531,6 +548,18 @@ function setup() {
     socket.on('receiveDiceValues', (_diceValues, _totalDicesValue) => {
       diceValues = _diceValues;
       totalDicesValue = _totalDicesValue;
+    });
+
+    socket.on('receiveBoardMoves', (moves) => {
+      let nbMoves = moves.length;
+
+      for (let i = 0; i < nbMoves; ++i) {
+        board[moves[i].idx][moves[i].color].isOccupied = moves[i].isOccupied;
+      }
+    });
+
+    socket.on('receiveNbPieces', (nbPieces) => {
+      players[HIM].nbPieces = nbPieces;
     });
   });
 }
