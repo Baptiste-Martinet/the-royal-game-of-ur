@@ -323,6 +323,7 @@ function setPlayerState(state)
   playerState = state;
 
   if (playerState == DRAWING_DICE) {
+    buttons[0].enable();
   } else if (state == MOVING) {
   } else {
   }
@@ -341,6 +342,11 @@ function buttonPressed()
     totalDicesValue += diceValues[i];
   }
   console.log(INFO_MSG, 'totalDicesValue: ', totalDicesValue);
+
+  /* network */
+  socket.emit('sendDiceValues', diceValues, totalDicesValue);
+
+  /* player state */
   setPlayerState(MOVING);
 }
 
@@ -419,6 +425,7 @@ function preload()
     color(59, 196, 96), /* stroke color */
     color(59, 196, 96) /* stroke hover color */
   );
+  buttons[0].disable();
 }
 
 function setup() {
@@ -495,16 +502,35 @@ function setup() {
       players[HIM].mousePos.y = topLeft.y + (mY * (CELL_SIZE / cellSize));
     });
 
-    socket.on('joinSuccess', () => {
-      spanUrl.show();
-      setTimeout(() => {
-        spanUrl.hide();
-      }, 20000);
+    socket.on('joinSuccess', (nbPlayers) => {
+      if (nbPlayers == 1) {
+        spanUrl.show();
+      } else if (nbPlayers == 2) {
+        players[ME].color = 1;
+        players[HIM].color = 0;
+      }
     });
 
     socket.on('joinError', () => {
       canvas.hide();
       spanError.show();
+    });
+
+    socket.on('newUser', () => {
+      setTimeout(() => {
+        spanUrl.hide();
+      }, 2000);
+    });
+
+    /* GAME NETWORK */
+
+    socket.on('setPlayerState', (state) => {
+      setPlayerState(state);
+    });
+
+    socket.on('receiveDiceValues', (_diceValues, _totalDicesValue) => {
+      diceValues = _diceValues;
+      totalDicesValue = _totalDicesValue;
     });
   });
 }

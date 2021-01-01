@@ -16,10 +16,14 @@ const { v4: uuidv4 } = require('uuid');
 
 /* server code */
 
+const WAITING = 'waiting';
+const DRAWING_DICE = 'drawing dice';
+const MOVING = 'moving';
+
 class Room {
     constructor(_id) {
         this.id = _id;
-        this.nbPlayers = 0;
+        this.players = [];
     }
 }
 
@@ -54,10 +58,15 @@ io.sockets.on('connection', (socket) => {
             socket.emit('joinError');
             return;
         }
-        myRoom.nbPlayers++;
+        myRoom.players.push(socket.id);
         socket.join(myRoom.id);
-        socket.emit('joinSuccess');
-        console.log('User', socket.id, 'has joined room', myRoom.id, '. The room contains', myRoom.nbPlayers, 'player');
+        socket.emit('joinSuccess', myRoom.players.length);
+        socket.to(myRoom.id).emit('newUser');
+        console.log('User', socket.id, 'has joined room', myRoom.id, '. The room contains', myRoom.players.length, 'player');
+
+        if (myRoom.players.length == 2) {
+          io.to(myRoom.players[Math.floor(Math.random() * 2)]).emit('setPlayerState', DRAWING_DICE);
+        }
     });
 
     socket.on('sendMouseMoved', (mouseX, mouseY, CELL_SIZE) => {
@@ -70,15 +79,25 @@ io.sockets.on('connection', (socket) => {
         console.log('User disconnected.', socket.id);
 
         if (myRoom === null) {
-            return;
+          return;
         }
-        myRoom.nbPlayers--;
+        let idx;
+        if ((idx = myRoom.players.indexOf(socket.id)) != -1) {
+          myRoom.players.splice(idx, 1);
+          console.log('Deleted player', socket.id, 'from room', myRoom.id);
+        }
         if (myRoom.nbPlayers <= 0) {
-          let idx;
           if ((idx = rooms.indexOf(myRoom)) != -1) {
             console.log('Room', myRoom.id, 'has been deleted due to inactivity');
             rooms.splice(idx, 1);
           }
         }
+    });
+
+    /* GAME NETWORK */
+
+
+    socket.on('sendDiceValues', (diceValues, totalDicesValue) => {
+      socket.to(myRoom.id).emit('receiveDiceValues', diceValues, totalDicesValue);
     });
 });
