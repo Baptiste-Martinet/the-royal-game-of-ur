@@ -103,8 +103,8 @@ io.sockets.on('connection', (socket) => {
       socket.to(myRoom.id).emit('receiveBoard', board);
     });
 
-    socket.on('sendNbPieces', (nbPieces) => {
-      socket.to(myRoom.id).emit('receiveNbPieces', nbPieces);
+    socket.on('sendNbPieces', (nbPiecesHim, nbPiecesMe) => {
+      socket.to(myRoom.id).emit('receiveNbPieces', nbPiecesHim, nbPiecesMe);
     });
 
     socket.on('nextTurn', () => {

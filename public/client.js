@@ -16,10 +16,11 @@ class Player {
 }
 
 class Cell {
-  constructor (_pos) {
+  constructor (_pos, _isDoubled) {
     /* GAME */
     this.isOccupied = false;
     this.pos = _pos;
+    this.isDoubled = _isDoubled;
 
     /* UI */
     this.isHovered = false;
@@ -38,73 +39,6 @@ class ColorTheme {
     this.cellCornerRadius = _cellCornerRadius;
     this.diceTriangleStrokes = _diceTriangleStorkes;
     this.diceTriangleStrokesSize = _diceTriangleStrokesSize;
-  }
-}
-
-class Button {
-  constructor(_text, _callback, _pos, _size, _textColor, _color, _hoverColor, _textHoverColor, _strokeSize, _strokeColor, _strokeHoverColor) {
-    this.text = _text;
-    this.callback = _callback;
-    this.pos = _pos;
-    this.size = _size;
-    this.textColor = _textColor;
-    this.color = _color;
-    this.hoverColor = _hoverColor;
-    this.textHoverColor = _textHoverColor;
-    this.strokeSize = _strokeSize;
-    this.strokeColor = _strokeColor;
-    this.strokeHoverColor = _strokeHoverColor;
-
-    this.isDisplayed = true;
-    this.isClicked = false;
-    this.isEnabled = true;
-  }
-
-  setPosition(_x, _y) {
-    this.pos.x = _x;
-    this.pos.y = _y;
-  }
-
-  setSize(_x, _y) {
-    this.size.x = _x;
-    this.size.y = _y;
-  }
-
-  show() {
-    this.isDisplayed = true;
-  }
-
-  hide() {
-    this.isDisplayed = false;
-  }
-
-  enable() {
-    this.isEnabled = true;
-  }
-
-  disable() {
-    this.isEnabled = false;
-  }
-
-  callTheCallbackFunction() {
-    if (this.isClicked) {
-      console.log(ERROR_MSG, 'Stop spamming my dude');
-      return;
-    }
-    this.isClicked = true;
-
-    let tmpStrokeHoverColor = color(this.strokeHoverColor);
-    let tmpStrokeColor = color(this.strokeColor);
-
-    this.strokeHoverColor = color(255);
-    this.strokeColor = color(255);
-
-    setTimeout(() => {
-      this.strokeHoverColor = tmpStrokeHoverColor;
-      this.strokeColor = tmpStrokeColor;
-      this.isClicked = false;
-    }, 200);
-    this.callback();
   }
 }
 
@@ -147,148 +81,15 @@ var socket;
 
 /* utils functions */
 
-function drawPiece(pos, color)
-{
-  let p5PieceColor = theme.pieceColors[color];
-
-  stroke(red(p5PieceColor), green(p5PieceColor), green(p5PieceColor), 180);
-  strokeWeight(CELL_SIZE * 0.075);
-  fill(p5PieceColor);
-  circle(pos.x + CELL_SIZE / 2, pos.y + CELL_SIZE / 2, CELL_SIZE * 0.7);
-}
-
-function drawCell(cell)
-{
-  stroke(theme.grid);
-  strokeWeight(2);
-  fill(theme.cells);
-  square(cell.pos.x, cell.pos.y, CELL_SIZE, CELL_SIZE * (theme.cellCornerRadius / 80));
-}
-
-function displayBoard()
-{
-  for (let i = 0; i < 14; ++i) {
-    drawCell(board[i][WHITE]);
-    drawCell(board[i][BLACK]);
-  }
-}
-
-function displayPieces()
-{
-  for (let i = 0; i < 14; ++i) {
-    if (board[i][WHITE].isOccupied)
-      drawPiece(board[i][WHITE].pos, WHITE);
-    if (board[i][BLACK].isOccupied)
-      drawPiece(board[i][BLACK].pos, BLACK);
-  }
-}
-
-function displayHoveredCells()
-{
-  for (let i = 0; i < 14; ++i) {
-    if (board[i][players[ME].color].isHovered) {
-      noStroke();
-      fill(theme.hoveredCells);
-      square(board[i][players[ME].color].pos.x, board[i][players[ME].color].pos.y, CELL_SIZE, CELL_SIZE * (theme.cellCornerRadius / 80));
-    }
-  }
-}
-
-function drawNbPieces(player)
-{
-  let pos = new Vec2d(topLeft.x + (CELL_SIZE * 4), topLeft.y + (CELL_SIZE * (player.color == WHITE ? 2 : 0)));
-
-  drawPiece(pos, player.color);
-  fill(255);
-  noStroke();
-  textSize(CELL_SIZE * 0.4);
-  textAlign(CENTER, CENTER);
-  text(player.nbPieces, pos.x + CELL_SIZE / 2, pos.y + CELL_SIZE / 2);
-}
-
-function displayNbPieces()
-{
-  drawNbPieces(players[ME]);
-  drawNbPieces(players[HIM]);
-}
-
-function drawTriangle(bottomLeftCoords, size)
-{
-  stroke(theme.diceTriangleStrokes);
-  strokeWeight(theme.diceTriangleStrokesSize);
-  fill(theme.diceTriangles);
-  triangle(bottomLeftCoords.x, bottomLeftCoords.y, bottomLeftCoords.x + (size / 2), bottomLeftCoords.y - (size * 0.9), bottomLeftCoords.x + size, bottomLeftCoords.y);
-}
-
-function displayDicesTriangles()
-{
-  let bottomLeft = new Vec2d(topLeft.x + (CELL_SIZE * 1.3), topLeft.y + (CELL_SIZE * 3.7));
-  let triangleSize = CELL_SIZE * 0.6;
-
-  for (let i = 0; i < 4; ++i) {
-    drawTriangle(bottomLeft, triangleSize);
-
-    if (diceValues[i] == 1) {
-      fill(theme.diceCircles);
-      noStroke();
-      circle(bottomLeft.x + triangleSize / 2, bottomLeft.y - triangleSize * 0.35, triangleSize * 0.3);
-    }
-    bottomLeft.x += triangleSize + 8;
-  }
-}
-
-function drawButton(button)
-{
-  /* rect */
-  strokeWeight(button.strokeSize);
-  stroke(button.isHovered ? button.strokeHoverColor : button.strokeColor);
-  fill(button.isHovered ? button.hoverColor : button.color);
-  rect(button.pos.x, button.pos.y, button.size.x, button.size.y, 4);
-
-  /* text */
-  textAlign(CENTER, CENTER);
-  textSize(CELL_SIZE * 0.3);
-  textStyle(BOLD);
-  fill(button.isHovered ? button.textHoverColor : button.textColor);
-  noStroke();
-  text(button.text, button.pos.x + button.size.x / 2, button.pos.y + button.size.y / 2);
-
-  /* enable/disable */
-  if (!button.isEnabled) {
-    strokeWeight(button.strokeSize);
-    stroke(0, 200);
-    fill(0, 200);
-    rect(button.pos.x, button.pos.y, button.size.x, button.size.y, 4);
-  }
-}
-
-function displayButtons()
-{
-  for (let i = 0; i < NB_BUTTONS; ++i) {
-    if (!buttons[i].isDisplayed)
-      continue;
-    drawButton(buttons[i]);
-  }
-}
-
-function drawMousePointer(name, pos)
-{
-  let pointerSize = CELL_SIZE * 0.09;
-
-  image(otherPointerImg, pos.x, pos.y, pointerSize, pointerSize * 1.6);
-  noStroke();
-  fill(255);
-  textAlign(LEFT, TOP);
-  textSize(pointerSize);
-  textStyle(BOLD);
-  text(name, pos.x + pointerSize * 1.6, pos.y + pointerSize * 1.6);
-}
-
 function setCellsPos()
 {
   let currentPos = new Vec2d(3, 0);
 
   for (let i = 0; i < 14; ++i) {
+    if (i == 3 || i == 7 || i == 13) {
+      board[i][BLACK].isDoubled = true;
+      board[i][WHITE].isDoubled = true;
+    }
     board[i][BLACK].pos.x = topLeft.x + CELL_SIZE * currentPos.x;
     board[i][BLACK].pos.y = topLeft.y + CELL_SIZE * currentPos.y;
     board[i][WHITE].pos.x = topLeft.x + CELL_SIZE * currentPos.x;
@@ -331,6 +132,7 @@ function setPlayerState(state)
   } else {
     diceValues.fill(0);
     totalDicesValue = -1;
+    buttons[0].disable();
   }
 }
 
@@ -382,13 +184,12 @@ function newPieceButtonClicked(color)
   board[totalDicesValue - 1][color].isOccupied = true;
   players[ME].nbPieces--;
 
-  /* network */
-  socket.emit('sendBoard', board);
-  socket.emit('sendNbPieces', players[ME].nbPieces);
-  socket.emit('nextTurn');
-
   /* player state */
   setPlayerState(WAITING);
+  /* network */
+  socket.emit('sendBoard', board);
+  socket.emit('sendNbPieces', players[ME].nbPieces, players[HIM].nbPieces);
+  socket.emit('nextTurn');
 }
 
 function movePiece(idx, who)
@@ -405,19 +206,32 @@ function movePiece(idx, who)
     console.log(ERROR_MSG, 'Cell is empty');
     return;
   }
-  if (board[idx + totalDicesValue][who].isOccupied == true) {
-    console.log(ERROR_MSG, 'Can not move here:', 'Cell is already occupied');
-    return;
-  }
-  board[idx][who].isOccupied = false;
-
   if (idx + totalDicesValue == 14) {
     players[who].score++;
   } else {
+    if (board[idx + totalDicesValue][who].isOccupied == true) {
+      console.log(ERROR_MSG, 'Can not move here:', 'Cell is already occupied');
+      return;
+    }
+
+    /* attack */
+    if (board[idx + totalDicesValue][who == 0 ? 1 : 0].isOccupied) {
+      board[idx + totalDicesValue][who == 0 ? 1 : 0].isOccupied = false;
+      players[HIM].nbPieces++;
+    }
     board[idx + totalDicesValue][who].isOccupied = true;
   }
+  board[idx][who].isOccupied = false;
 
-  setPlayerState(WAITING);
+  if (board[idx + totalDicesValue][who].isDoubled) {
+    setPlayerState(DRAWING_DICE);
+  } else {
+    setPlayerState(WAITING);
+    socket.emit('nextTurn');
+  }
+  /* network */
+  socket.emit('sendBoard', board);
+  socket.emit('sendNbPieces', players[ME].nbPieces, players[HIM].nbPieces);
 }
 
 /* p5 functions */
@@ -562,8 +376,9 @@ function setup() {
       }
     });
 
-    socket.on('receiveNbPieces', (nbPieces) => {
-      players[HIM].nbPieces = nbPieces;
+    socket.on('receiveNbPieces', (nbPiecesHim, nbPiecesMine) => {
+      players[HIM].nbPieces = nbPiecesHim;
+      players[ME].nbPieces = nbPiecesMine;
     });
   });
 }
