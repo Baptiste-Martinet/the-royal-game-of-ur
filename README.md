@@ -3,4 +3,4 @@ Multiplayer implementation of the famous Royal Game Of Ur in a web browser.
 
 ![Alt text](public/images/817dxnt7bAL._AC_SL1500_.jpg?raw=true "The royal game of Ur")
 
-![Alt text](public/images/screenshot.png?raw=true "The royal game of Ur ONLINE")
+![Alt text](public/images/screenshot.PNG?raw=true "The royal game of Ur ONLINE")
