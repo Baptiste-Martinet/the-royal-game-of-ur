@@ -16,7 +16,10 @@ function drawCell(cell)
   square(cell.pos.x, cell.pos.y, CELL_SIZE, CELL_SIZE * (theme.cellCornerRadius / 80));
   if (cell.isDoubled) {
     let doubledPos = new Vec2d(cell.pos.x + CELL_SIZE * 0.85, cell.pos.y + CELL_SIZE * 0.85);
-    fill(255);
+    if (cell.canLandHere)
+      fill(255);
+    else
+      fill(252, 255, 179);
     noStroke();
     circle(doubledPos.x, doubledPos.y, CELL_SIZE * 0.1);
   }

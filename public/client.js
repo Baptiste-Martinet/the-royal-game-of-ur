@@ -21,6 +21,7 @@ class Cell {
     this.isOccupied = false;
     this.pos = _pos;
     this.isDoubled = _isDoubled;
+    this.canLandHere = true;
 
     /* UI */
     this.isHovered = false;
@@ -89,6 +90,10 @@ function setCellsPos()
     if (i == 3 || i == 7 || i == 13) {
       board[i][BLACK].isDoubled = true;
       board[i][WHITE].isDoubled = true;
+      if (i == 7) {
+        board[i][BLACK].canLandHere = false;
+        board[i][WHITE].canLandHere = false;
+      }
     }
     board[i][BLACK].pos.x = topLeft.x + CELL_SIZE * currentPos.x;
     board[i][BLACK].pos.y = topLeft.y + CELL_SIZE * currentPos.y;
@@ -268,9 +273,9 @@ function setup() {
   canvas = createCanvas(windowWidth, windowHeight);
 
   theme = new ColorTheme(
-    color(17, 17, 17), /* background color */
+    color(18), /* background color */
     color(156, 43, 255), /* grid color */
-    color(0 , 0), /* cells color */
+    color(0, 0), /* cells color */
     color(0, 0), /* dice triangles color */
     color(255), /* dice circles color */
     color(70, 100), /* hovered cell color */
