@@ -211,6 +211,9 @@ function movePiece(idx, who)
     console.log(ERROR_MSG, 'Cell is empty');
     return;
   }
+
+  let offset = 0;
+
   if (idx + totalDicesValue == 14) {
     players[who].score++;
   } else {
@@ -218,17 +221,20 @@ function movePiece(idx, who)
       console.log(ERROR_MSG, 'Can not move here:', 'Cell is already occupied');
       return;
     }
+    if (idx + totalDicesValue == 7 && board[idx + totalDicesValue][who == 0 ? 1 : 0].isOccupied) {
+      offset = 1;
+    }
 
     /* attack */
-    if (board[idx + totalDicesValue][who == 0 ? 1 : 0].isOccupied) {
-      board[idx + totalDicesValue][who == 0 ? 1 : 0].isOccupied = false;
+    if (board[idx + totalDicesValue + offset][who == 0 ? 1 : 0].isOccupied) {
+      board[idx + totalDicesValue + offset][who == 0 ? 1 : 0].isOccupied = false;
       players[HIM].nbPieces++;
     }
-    board[idx + totalDicesValue][who].isOccupied = true;
+    board[idx + totalDicesValue + offset][who].isOccupied = true;
   }
   board[idx][who].isOccupied = false;
 
-  if (board[idx + totalDicesValue][who].isDoubled) {
+  if (board[idx + totalDicesValue + offset][who].isDoubled) {
     setPlayerState(DRAWING_DICE);
   } else {
     setPlayerState(WAITING);
@@ -433,6 +439,7 @@ function mouseMoved() {
     }
   }
 
+  /* buttons */
   for (let i = 0; i < NB_BUTTONS; ++i) {
     if (buttons[i].isDisplayed && isMouseInBound(buttons[i].pos, buttons[i].size.x, buttons[i].size.y)) {
       if (!buttons[i].isHovered)
