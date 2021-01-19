@@ -19,7 +19,7 @@ function drawCell(cell)
     if (cell.canLandHere)
       fill(255);
     else
-      fill(252, 255, 179);
+      fill(255, 236, 64);
     noStroke();
     circle(doubledPos.x, doubledPos.y, CELL_SIZE * 0.1);
   }
