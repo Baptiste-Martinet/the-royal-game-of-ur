@@ -12,15 +12,11 @@
     "url": "git+https://github.com/Baptiste-Martinet/the-royal-game-of-ur.git"
   },
   "keywords": [
-    "royal",
-    "game",
-    "of",
-    "ur",
-    "node",
-    "js",
+    "royal game of ur",
     "nodejs",
     "multiplayer",
-    "web"
+    "web",
+    "p5"
   ],
   "author": "Baptiste Martinet",
   "license": "ISC",
