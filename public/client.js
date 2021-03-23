@@ -217,12 +217,13 @@ function movePiece(idx, who)
   if (idx + totalDicesValue == 14) {
     players[who].score++;
   } else {
-    if (board[idx + totalDicesValue][who].isOccupied == true) {
-      console.log(ERROR_MSG, 'Can not move here:', 'Cell is already occupied');
-      return;
-    }
     if (idx + totalDicesValue == 7 && board[idx + totalDicesValue][who == 0 ? 1 : 0].isOccupied) {
       offset = 1;
+    }
+
+    if (board[idx + totalDicesValue + offset][who].isOccupied == true) {
+      console.log(ERROR_MSG, 'Can not move here:', 'Cell is already occupied');
+      return;
     }
 
     /* attack */
