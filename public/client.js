@@ -483,6 +483,23 @@ function mousePressed()
   }
 }
 
+function keyReleased()
+{
+  switch (keyCode) {
+    case 80:
+      if (playerState != DRAWING_DICE) {
+        console.log('Can t pass if its not your turn.')
+        return;
+      }
+      console.log('Passing turn...');
+      setPlayerState(WAITING);
+      socket.emit('nextTurn');
+      break;
+    default:
+      break;
+  }
+}
+
 /* not p5 */
 
 function copyURLToClipBoard()
