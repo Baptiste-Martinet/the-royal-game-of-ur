@@ -69,12 +69,6 @@ io.sockets.on('connection', (socket) => {
         }
     });
 
-    socket.on('sendMouseMoved', (mouseX, mouseY, CELL_SIZE) => {
-        if (myRoom === null)
-            return;
-        socket.to(myRoom.id).emit("eventMouseMoved", mouseX, mouseY, CELL_SIZE);
-    });
-
     socket.on('disconnect', () => {
         console.log('User disconnected.', socket.id);
 
@@ -86,7 +80,7 @@ io.sockets.on('connection', (socket) => {
           myRoom.players.splice(idx, 1);
           console.log('Deleted player', socket.id, 'from room', myRoom.id);
         }
-        if (myRoom.nbPlayers <= 0) {
+        if (myRoom.players.length <= 0) {
           if ((idx = rooms.indexOf(myRoom)) != -1) {
             console.log('Room', myRoom.id, 'has been deleted due to inactivity');
             rooms.splice(idx, 1);
@@ -95,6 +89,13 @@ io.sockets.on('connection', (socket) => {
     });
 
     /* GAME NETWORK */
+
+    socket.on('sendMouseMoved', (mouseX, mouseY, CELL_SIZE) => {
+      if (myRoom === null)
+          return;
+      socket.to(myRoom.id).emit("eventMouseMoved", mouseX, mouseY, CELL_SIZE);
+  });
+  
     socket.on('sendDiceValues', (diceValues, totalDicesValue) => {
       socket.to(myRoom.id).emit('receiveDiceValues', diceValues, totalDicesValue);
     });
