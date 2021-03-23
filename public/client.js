@@ -213,9 +213,11 @@ function movePiece(idx, who)
   }
 
   let offset = 0;
+  let isScoringPlay = false;
 
   if (idx + totalDicesValue == 14) {
     players[who].score++;
+    isScoringPlay = true;
   } else {
     if (idx + totalDicesValue == 7 && board[idx + totalDicesValue][who == 0 ? 1 : 0].isOccupied) {
       offset = 1;
@@ -227,7 +229,7 @@ function movePiece(idx, who)
     }
 
     /* attack */
-    if (board[idx + totalDicesValue + offset][who == 0 ? 1 : 0].isOccupied) {
+    if (idx + totalDicesValue + offset > 3 && idx + totalDicesValue + offset < 12 && board[idx + totalDicesValue + offset][who == 0 ? 1 : 0].isOccupied) {
       board[idx + totalDicesValue + offset][who == 0 ? 1 : 0].isOccupied = false;
       players[HIM].nbPieces++;
     }
@@ -235,7 +237,7 @@ function movePiece(idx, who)
   }
   board[idx][who].isOccupied = false;
 
-  if (board[idx + totalDicesValue + offset][who].isDoubled) {
+  if (!isScoringPlay && board[idx + totalDicesValue + offset][who].isDoubled) {
     setPlayerState(DRAWING_DICE);
   } else {
     setPlayerState(WAITING);
@@ -244,6 +246,12 @@ function movePiece(idx, who)
   /* network */
   socket.emit('sendBoard', board);
   socket.emit('sendNbPieces', players[ME].nbPieces, players[HIM].nbPieces);
+
+  if (isScoringPlay && players[who].score >= 7) {
+    alert('You win !');
+    socket.emit('sendLose');
+    setPlayerState(WAITING);
+  }
 }
 
 /* p5 functions */
@@ -391,6 +399,11 @@ function setup() {
     socket.on('receiveNbPieces', (nbPiecesHim, nbPiecesMine) => {
       players[HIM].nbPieces = nbPiecesHim;
       players[ME].nbPieces = nbPiecesMine;
+    });
+
+    socket.on('receiveLose', () => {
+      alert('You lose!');
+      setPlayerState(WAITING);
     });
   });
 }

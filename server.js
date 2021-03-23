@@ -95,7 +95,7 @@ io.sockets.on('connection', (socket) => {
           return;
       socket.to(myRoom.id).emit("eventMouseMoved", mouseX, mouseY, CELL_SIZE);
   });
-  
+
     socket.on('sendDiceValues', (diceValues, totalDicesValue) => {
       socket.to(myRoom.id).emit('receiveDiceValues', diceValues, totalDicesValue);
     });
@@ -110,5 +110,9 @@ io.sockets.on('connection', (socket) => {
 
     socket.on('nextTurn', () => {
       socket.to(myRoom.id).emit('setPlayerState', DRAWING_DICE);
+    });
+
+    socket.on('sendLose', () => {
+      socket.to(myRoom.id).emit('receiveLose');
     });
 });
