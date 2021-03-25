@@ -76,6 +76,7 @@ const NB_BUTTONS = 1;
 
 var spanUrl;
 var spanError;
+var spanEndGame;
 
 /* web socket */
 var socket;
@@ -248,7 +249,9 @@ function movePiece(idx, who)
   socket.emit('sendNbPieces', players[ME].nbPieces, players[HIM].nbPieces);
 
   if (isScoringPlay && players[who].score >= 7) {
-    alert('You win !');
+    canvas.hide();
+    spanEndGame.elt.textContent = 'You win !';
+    spanEndGame.show();
     socket.emit('sendLose');
     setPlayerState(WAITING);
   }
@@ -328,6 +331,19 @@ function setup() {
   spanError.style('user-select', 'none');
   spanError.hide();
 
+  spanEndGame = createSpan('You won !');
+  spanEndGame.position(0, 0);
+  spanEndGame.style('top:50%;left:50%;transform: translate(-50%, -50%)');
+  spanEndGame.style('color', 'white');
+  spanEndGame.style('background-color', '#333333');
+  spanEndGame.style('padding', '1vw');
+  spanEndGame.style('border-radius', '1vw');
+  spanEndGame.style('font-weight', 'bold');
+  spanEndGame.style('font-size', '3vw');
+  spanEndGame.style('font-family', 'monospace');
+  spanEndGame.style('user-select', 'none');
+  spanEndGame.hide();
+
   /* socket */
   socket = io.connect();
   console.log('Connected');
@@ -402,7 +418,9 @@ function setup() {
     });
 
     socket.on('receiveLose', () => {
-      alert('You lose!');
+      canvas.hide();
+      spanEndGame.elt.textContent = 'You lost !';
+      spanEndGame.show();
       setPlayerState(WAITING);
     });
   });
@@ -501,7 +519,7 @@ function keyReleased()
 {
   switch (keyCode) {
     case 80:
-      if (playerState != DRAWING_DICE) {
+      if (playerState != MOVING) {
         console.log('Can t pass if its not your turn.')
         return;
       }
